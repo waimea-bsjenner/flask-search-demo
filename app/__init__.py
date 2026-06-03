@@ -40,8 +40,17 @@ def show_all_creatures():
         """
         params = ()
         creatures = db.execute(sql, params).fetchall()
-
-        return render_template("pages/creature_list.jinja", creatures=creatures)
+        
+        sql = """
+            SELECT DISTINCT species
+            FROM creatures
+            ORDER BY species asc
+        """
+        
+        params = ()
+        species_get = db.execute(sql, params).fetchall()
+        species_list = [species['species'] for species in species_get]
+        return render_template("pages/creature_list.jinja", creatures=creatures, species_list=species_list)
 
 
 #-----------------------------------------------------------
@@ -57,6 +66,35 @@ def show_help():
 
     return render_template("pages/help.jinja")
 
+#-----------------------------------------------------------
+# Search route
+#-----------------------------------------------------------
+@app.get("/search")
+def process_search():
+    search_term = request.args.get('q', '')
+    search_match = f"%{search_term}%"
+
+    species = request.form.get(species)
+
+    with connect_db() as db:
+        sql = """
+            SELECT id, species, name
+            FROM creatures
+            WHERE name LIKE ? AND species LIKE ?
+        """
+        params = (search_match, species)
+        creatures = db.execute(sql, params).fetchall()
+
+        sql = """
+            SELECT DISTINCT species
+            FROM creatures
+            ORDER BY species asc
+        """
+        
+        params = ()
+        species_get = db.execute(sql, params).fetchall()
+        species_list = [species['species'] for species in species_get]
+        return render_template("pages/creature_list.jinja", creatures=creatures, search_term=search_term, species_list=species_list)
 
 #===========================================================
 # Configure the app

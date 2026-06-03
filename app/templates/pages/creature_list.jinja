@@ -9,6 +9,26 @@
 
     <h2>List of Creatures</h2>
 
+    <form action="/search" method="get">
+    
+        <label>
+            Search for...
+            <input type="text" name="q">
+        </label>
+
+        <select name="species">
+            <option value="">Any</option>
+
+            {% for species in species_list %}
+                <option>{{ species }}</option>
+            {% endfor %}
+
+        </select>
+
+        <button>Search</button>
+
+    </form>
+
     <section id="creatures">
 
         {% for creature in creatures %}
